@@ -30,7 +30,7 @@ subtype field_t is std_logic_vector(15 downto 0);
 constant INFO_APP_ID : std_logic_vector(7 downto 0) := x"02"; -- application identifier for 2-way interactions
 constant INFO_VERSION_MAJOR : std_logic_vector(7 downto 0) := x"02";
 constant INFO_VERSION_MINOR : std_logic_vector(7 downto 0) := x"02";
-constant INFO_VERSION_REVISION : std_logic_vector(7 downto 0) := x"01";
+constant INFO_VERSION_REVISION : std_logic_vector(7 downto 0) := x"02";
          
 constant INFO_STREAM_FREQUENCY : std_logic_vector(31 downto 0) := x"0FDAD680"; -- 266 MHz
          
