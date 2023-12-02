@@ -344,8 +344,8 @@ begin
           last_init_snpidx_tig <= unsigned(inbuffer_dout(159 downto 128));
           stream_start_snpidx_tig <= unsigned(inbuffer_dout(191 downto 160));
           
-          stream_start_addr_tig <= unsigned(inbuffer_dout(221 downto 192)); -- 29bit!
-          round_addr_offset_tig <= unsigned(inbuffer_dout(253 downto 224)); -- 29bit!
+          stream_start_addr_tig <= unsigned(inbuffer_dout(221 downto 192)); -- 30bit!
+          round_addr_offset_tig <= unsigned(inbuffer_dout(253 downto 224)); -- 30bit!
           
           indata_state <= CONSTANTS2;
           
