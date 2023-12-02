@@ -30,6 +30,30 @@ architecture Behavioral of ad8k5_2way_ctables_tb is
   
   constant PCI_CLK_PERIOD : time := 4 ns;
   constant RAM_CLK_PERIOD : time := 5 ns;
+  
+  function constants_2_dma_word(
+      num_samples_rounded : integer;
+      num_cases_rounded : integer;
+      num_snps_local: integer;
+      last_init_snpidx: integer;
+      stream_start_snpidx: integer;
+      stream_start_addr: integer;
+      round_addr_offset: integer
+  ) return std_logic_vector is
+      variable result : std_logic_vector(255 downto 0);
+  begin
+      result(31 downto 0) := std_logic_vector(to_unsigned(num_samples_rounded, 32));
+      result(63 downto 32) := std_logic_vector(to_unsigned(num_cases_rounded, 32));
+      result(95 downto 64) := std_logic_vector(to_unsigned(num_snps_local, 32));
+      
+      result(159 downto 128) := std_logic_vector(to_unsigned(last_init_snpidx, 32));
+      result(191 downto 160) := std_logic_vector(to_unsigned(stream_start_snpidx, 32));
+      
+      result(221 downto 192) := std_logic_vector(to_unsigned(stream_start_addr, 30));
+      result(253 downto 224) := std_logic_vector(to_unsigned(round_addr_offset, 30));
+      
+      return result;
+  end function;
 
   signal clk, resetn        : std_logic;
   signal dma0_m_axis_tdata  : std_logic_vector(255 downto 0);
@@ -195,7 +219,16 @@ begin
    
    wait until rising_edge(clk);
    -- 6 SNPs, 16 cases, 240 controls
-   dma0_m_axis_tdata <= x"0000000000000000000000000000000600000000000000100000000000000100";
+   dma0_m_axis_tdata <= constants_2_dma_word(
+       16#0000_0100#, -- num_samples_rounded
+       16#0000_0000#, -- num_cases_rounded
+       16#0000_0010#, -- num_snps_local
+       16#0000_0000#, -- last_init_snpidx
+       16#0000_0006#, -- stream_start_snpidx
+       16#0000_0000#, -- stream_start_addr 30 Bit!
+       16#0000_0000#  -- round_addr_offset 30 Bit!
+   );
+   -- dma0_m_axis_tdata <= x"000000000000000000000000 00000006 00000000 00000010 00000000 00000100";
    
    wait until rising_edge(clk);
    -- 1GB buffer size, 12 initialization data words
