@@ -31,7 +31,7 @@ architecture Behavioral of ad8k5_2way_ctables_tb is
   constant PCI_CLK_PERIOD : time := 4 ns;
   constant RAM_CLK_PERIOD : time := 5 ns;
   
-  function constants_2_dma_word(
+  function constants1_2_dma_word(
       num_samples_rounded : integer;
       num_cases_rounded : integer;
       num_snps_local: integer;
@@ -40,7 +40,7 @@ architecture Behavioral of ad8k5_2way_ctables_tb is
       stream_start_addr: integer;
       round_addr_offset: integer
   ) return std_logic_vector is
-      variable result : std_logic_vector(255 downto 0);
+      variable result : std_logic_vector(255 downto 0) := (others => '0');
   begin
       result(31 downto 0) := std_logic_vector(to_unsigned(num_samples_rounded, 32));
       result(63 downto 32) := std_logic_vector(to_unsigned(num_cases_rounded, 32));
@@ -54,9 +54,24 @@ architecture Behavioral of ad8k5_2way_ctables_tb is
       
       return result;
   end function;
+  
+  function constants2_2_dma_word(
+      last_raw_gt_word : integer;
+      ctable_io_bufsize_outwords : integer;
+      ctable_io_bufsize_tablewords: integer
+  ) return std_logic_vector is
+      variable result : std_logic_vector(255 downto 0) := (others => '0');
+  begin
+      result(31 downto 0) := std_logic_vector(to_unsigned(last_raw_gt_word, 32));
+      result(95 downto 64) := std_logic_vector(to_unsigned(ctable_io_bufsize_outwords, 32));
+      result(127 downto 96) := std_logic_vector(to_unsigned(ctable_io_bufsize_tablewords, 32));
+      
+      return result;
+  end function;
 
   signal clk, resetn        : std_logic;
   signal dma0_m_axis_tdata  : std_logic_vector(255 downto 0);
+  signal dma0_m_axis_tdata2  : std_logic_vector(255 downto 0);
   signal dma0_m_axis_tvalid : std_logic;
   signal dma0_m_axis_tready : std_logic;
   signal dma1_s_axis_tdata  : std_logic_vector(255 downto 0);
