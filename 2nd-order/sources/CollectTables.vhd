@@ -93,7 +93,7 @@ port map (
    dout(144) => table_small_round_done,
    full => out_buffer_full,
    empty => out_buffer_empty,
-   prog_full => open
+   prog_full => stall_out -- asserted if only 1024 entries left
 );
 
 
