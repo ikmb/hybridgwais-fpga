@@ -33,7 +33,6 @@ port (
    
    -- input stream data
    genotype_in     : in genotype_block_t; -- nx 2bit input genotype data
-   casenctrl_in    : in std_logic; -- '1' case, '0' ctrl
    new_genotype_in : in std_logic; -- indicates valid genotype data
    mask_in         : in  std_logic; -- indicates if the incoming genotype should be used ('0') or not ('1')
    snp_done_in     : in  std_logic; -- indicates the last valid genotype for this SNP
@@ -41,7 +40,6 @@ port (
    
    -- output stream data
    genotype_out     : out genotype_block_t; -- nx 2bit genotype data (one genotype per cycle)
-   casenctrl_out    : out std_logic; -- '1' case, '0' ctrl
    new_genotype_out : out std_logic; -- indicates valid genotype data
    mask_out         : out std_logic; -- indicates if the outgoing genotype should be used ('0') or not ('1')
    snp_done_out     : out std_logic; -- indicates the last valid genotype for this SNP (asserted only one cycle!)
@@ -50,7 +48,6 @@ port (
    -- pair stream
    genotypeA_out      : out genotype_block_t;
    genotypeB_out      : out genotype_block_t;
-   casenctrlAB_out    : out std_logic; -- '1' case, '0' ctrl
    new_genotypeAB_out : out std_logic;
    snp_doneAB_out     : out std_logic;
    round_doneAB_out   : out std_logic
@@ -60,8 +57,6 @@ end SNP_PairStreamer;
 architecture Behavioral of SNP_PairStreamer is
 
 signal genotype_i_del : genotype_block_t;
-signal casenctrl_del : std_logic;
---signal new_genotype_del : std_logic;
 signal snp_done_del : std_logic;
 signal round_done_del : std_logic;
 
@@ -109,16 +104,13 @@ begin
    
    genotype_i_del       <= genotype_in;
    genotype_out         <= genotype_in;
-   casenctrl_out        <= casenctrl_in;
    new_genotype_out     <= new_genotype_in;
    mask_out             <= mask_in;
    snp_done_out         <= snp_done_in;
    round_done_out       <= round_done_in;
-   casenctrl_del        <= casenctrl_in;
    snp_done_del         <= snp_done_in;
    round_done_del       <= round_done_in;
    genotypeB_out        <= genotype_i_del;
-   casenctrlAB_out      <= casenctrl_del;
    new_genotypeAB_out   <= '0';
    snp_doneAB_out       <= '0';
    round_doneAB_out     <= '0';

@@ -45,7 +45,6 @@ entity SNP_Reader is
 
       -- stream data (stream_clk domain)
       genotype_out       : out genotype_block_t; -- provides gts/cycle times 2bit genotype data
-      casenctrl_out      : out std_logic; -- '1' case, '0' ctrl
       new_genotype_out   : out std_logic; -- indicates valid genotype data
       snp_done_out       : out std_logic; -- indicates the last valid genotype of this SNP
       round_done_out     : out std_logic; -- indicates the end of a round (asserted only one cycle!)
@@ -73,7 +72,6 @@ architecture Behavioral of SNP_Reader is
    signal stream_start_snpidx : unsigned(31 downto 0);
    signal num_samples       : unsigned(31 - LOG_GENOTYPES_PER_CYCLE downto 0);
    signal num_sample_blocks_m1 : unsigned(23 downto 0);
-   signal num_cases         : unsigned(31 - LOG_GENOTYPES_PER_CYCLE downto 0);
 --   signal round_last_snp    : unsigned(31 downto 0);
    
    signal next_addr         : unsigned(29 downto 0) := (others => '0');
@@ -136,10 +134,7 @@ begin
          -- now calculated on host: round_addr_offset   <= ((LONGS_PER_RAMWORD * NUM_PE) * to_integer(num_samples_rounded_tig_in(31 downto 8))) + LONGS_PER_RAMWORD * NUM_PE;
       end if;
       -- the address space of NUM_PE SNPs (calculated on host)
-      round_addr_offset <= round_addr_offset_tig_in; 
-
-      -- num_cases_rounded_in is already rounded to a multiple of GENOTYPES_PER_CYCLE by the host
-      num_cases <= num_cases_rounded_tig_in(31 downto LOG_GENOTYPES_PER_CYCLE);
+      round_addr_offset <= round_addr_offset_tig_in;
 
       num_snps_local <= num_snps_local_tig_in;
       
@@ -512,13 +507,6 @@ begin
                -- round done indicator, was set at the beginning of this SNP
                round_done_out <= round_done;
             end if;
-         end if;
-
-         -- case vs. control
-         if sample_count < num_cases then
-            casenctrl_out <= '1';
-         else
-            casenctrl_out <= '0';
          end if;
 
       end if;

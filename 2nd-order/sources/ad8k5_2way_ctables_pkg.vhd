@@ -53,6 +53,7 @@ type genotype_vector is array (natural range <>) of genotype_t;
 subtype genotype_block_t is genotype_vector(GENOTYPES_PER_CYCLE-1 downto 0);
 type genotype_block_vector is array (natural range <>) of genotype_block_t;
 type counts_vector is array (natural range <>) of std_logic_vector(TRANSPORT_BUS_WIDTH-1 downto 0);
+-- TODO fix naming 'half_table'
 subtype half_table_t is std_logic_vector(NUM_COUNTERS_TRANSFERRED*CTABLE_ENTRY_WIDTH-1 downto 0);
 type half_table_vector is array (natural range <>) of half_table_t;
 type id_t is array (1 downto 0) of std_logic_vector(ID_WIDTH-1 downto 0);

@@ -127,7 +127,6 @@ architecture Behavioral of ad8k5_2way_ctables_main is
   signal snpreader_start_reading      : std_logic                     := '0';
   signal snpreader_busy               : std_logic                     := '0';
   signal snpreader_genotype           : genotype_block_t;
-  signal snpreader_casenctrl          : std_logic;
   signal snpreader_new_genotype       : std_logic                     := '0';
   signal snpreader_snp_done           : std_logic                     := '0';
   signal snpreader_round_done         : std_logic                     := '0';
@@ -140,15 +139,11 @@ architecture Behavioral of ad8k5_2way_ctables_main is
   signal snpreader_debug              : std_logic_vector(127 downto 0);
 
   signal ctchain_genotype     : genotype_block_vector(NUM_CHAINS downto 0);
-  signal ctchain_casenctrl    : std_logic_vector(NUM_CHAINS downto 0);
   signal ctchain_new_genotype : std_logic_vector(NUM_CHAINS downto 0);
   signal ctchain_mask         : std_logic_vector(NUM_CHAINS downto 0);
   signal ctchain_snp_done     : std_logic_vector(NUM_CHAINS downto 0);
   signal ctchain_round_done   : std_logic_vector(NUM_CHAINS downto 0);
 
-  signal ctchain_casetable_ready      : std_logic_vector(NUM_CHAINS - 1 downto 0);
-  signal ctchain_casetable_read       : std_logic_vector(NUM_CHAINS - 1 downto 0);
-  signal ctchain_casetable            : half_table_vector(NUM_CHAINS - 1 downto 0);
   signal ctchain_ctrltable_ready      : std_logic_vector(NUM_CHAINS - 1 downto 0);
   signal ctchain_ctrltable_read       : std_logic_vector(NUM_CHAINS - 1 downto 0);
   signal ctchain_ctrltable            : half_table_vector(NUM_CHAINS - 1 downto 0);
@@ -175,7 +170,9 @@ architecture Behavioral of ad8k5_2way_ctables_main is
   signal stall    : std_logic;
   
   -- table obtained from the FIFOs
-  type raw_data_vector is array (natural range <>) of std_logic_vector(351 downto 0);
+  constant CTABLE_WIDTH : integer := NUM_COUNTERS_TRANSFERRED * CTABLE_ENTRY_WIDTH;
+  constant ID_VECTOR_WIDTH : integer := ID_WIDTH * 2;
+  type raw_data_vector is array (natural range <>) of std_logic_vector(CTABLE_WIDTH + ID_VECTOR_WIDTH - 1 downto 0);
   signal table : raw_data_vector(NUM_CHAINS-1 downto 0) := (others => (others => '0'));
   
   --signal width_conv_reset  : std_logic_vector(NUM_CHAINS-1 downto 0) := (others => '0');
@@ -484,7 +481,6 @@ begin
 --      set_num_snps_in    => set_num_snps,
       start_reading_in   => snpreader_start_reading,
       genotype_out       => snpreader_genotype,
-      casenctrl_out      => snpreader_casenctrl,
       new_genotype_out   => snpreader_new_genotype,
       snp_done_out       => snpreader_snp_done,
       round_done_out     => snpreader_round_done,
@@ -503,7 +499,6 @@ begin
   -- generate processing element chains
 
   ctchain_genotype(0)     <= snpreader_genotype;
-  ctchain_casenctrl(0)    <= snpreader_casenctrl;
   ctchain_new_genotype(0) <= snpreader_new_genotype;
   ctchain_mask(0)         <= '0';
   ctchain_snp_done(0)     <= snpreader_snp_done;
@@ -518,20 +513,15 @@ begin
         table_read_clk       => pci_clk,
         table_read_clk_reset => pci_clk_sync_reset,
         genotype_in          => ctchain_genotype(C),
-        casenctrl_in         => ctchain_casenctrl(C),
         new_genotype_in      => ctchain_new_genotype(C),
         mask_in              => ctchain_mask(C),
         snp_done_in          => ctchain_snp_done(C),
         round_done_in        => ctchain_round_done(C),
         genotype_out         => ctchain_genotype(C + 1),
-        casenctrl_out        => ctchain_casenctrl(C + 1),
         new_genotype_out     => ctchain_new_genotype(C + 1),
         mask_out             => ctchain_mask(C + 1),
         snp_done_out         => ctchain_snp_done(C + 1),
         round_done_out       => ctchain_round_done(C + 1),
-        casetable_ready_out  => ctchain_casetable_ready(C),
-        casetable_read_in    => ctchain_casetable_read(C),
-        casetable_out        => ctchain_casetable(C),
         ctrltable_ready_out  => ctchain_ctrltable_ready(C),
         ctrltable_read_in    => ctchain_ctrltable_read(C),
         ctrltable_out        => ctchain_ctrltable(C),
@@ -631,9 +621,9 @@ begin
   
 end process calc_id_p;
 
-ctchain_casetable_read <= ctchain_table_read;
+-- TODO is it possible to simplify this?
 ctchain_ctrltable_read <= ctchain_table_read;
-ctchain_table_ready <= ctchain_casetable_ready and ctchain_ctrltable_ready;
+ctchain_table_ready <= ctchain_ctrltable_ready;
 
 
 out_map_p: process
@@ -741,10 +731,10 @@ chain_out_g: for C in 0 to NUM_CHAINS-1 generate
 -- build table from chain output + ID
 table(C) <= ctchain_id(C)(0)
           & ctchain_id(C)(1)
-          & ctchain_casetable(C)
           & ctchain_ctrltable(C)
           when process_finished = '0' else (others => '0'); -- for a clean padding
 
+-- TODO Update comment
 -- output mapping:
 -- 2x4 counters + ID have to be mapped to 256 bit DMA output
 -- each table is on 16 bit (i.e. 2 bytes) boundaries 
@@ -755,7 +745,8 @@ width_conv_i: entity work.conv_352_256_Wrapper
     aresetn       => not pci_clk_sync_reset,
     s_axis_tvalid => ctchain_table_read(C),
     s_axis_tready => width_conv_ready(C),
-    s_axis_tdata  => table(C), --table_dbg(C),
+    s_axis_tdata(207 downto 0)  => table(C), --table_dbg(C),
+    s_axis_tdata(351 downto 208) => (others => '0'), -- TODO is to stay compatible to the old interface
     s_axis_tlast  => width_conv_tlast(C),
     m_axis_tvalid => dma_dout_tvalid(C),
     m_axis_tready => dma_dout_tready(C),

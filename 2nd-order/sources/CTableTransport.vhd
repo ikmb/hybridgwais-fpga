@@ -34,20 +34,17 @@ port (
    table_busy_in  : in std_logic;
    table_ready_in : in std_logic;
    get_table_out : out std_logic;
-   table_casenctrl_in : in std_logic;
    table_round_done_in : in std_logic;
    table_counts_in : in std_logic_vector(TRANSPORT_BUS_WIDTH-1 downto 0);
    
    -- Bus input
    slot_occ_in : in std_logic;
-   slot_casenctrl_in : in std_logic;
    slot_row_done_in : in std_logic;
    slot_round_done_in : in std_logic;
    bus_data_in : in std_logic_vector(TRANSPORT_BUS_WIDTH-1 downto 0);
    
    -- Bus output
    slot_occ_out : out std_logic;
-   slot_casenctrl_out : out std_logic;
    slot_row_done_out : out std_logic;
    slot_round_done_out : out std_logic;
    bus_data_out : out std_logic_vector(TRANSPORT_BUS_WIDTH-1 downto 0)
@@ -81,7 +78,6 @@ begin
      
         -- always put output from PE on bus as soon as it is ready
         bus_data_out <= table_counts_in;
-        slot_casenctrl_out <= table_casenctrl_in;
         slot_round_done_out <= table_round_done_in;
         -- potentionally this is the last table in this row
         -- will be blocked by further PEs if they prepare a table themselves
@@ -96,7 +92,6 @@ begin
      else -- all other PEs
      
         bus_data_out <= bus_data_in;
-        slot_casenctrl_out <= slot_casenctrl_in;
         -- the "round done" information of the previous PE is only forwarded if this PE 
         -- does not have a table ready since it would carry the same information again 
         slot_round_done_out <= slot_round_done_in and not table_ready_in;
@@ -108,7 +103,6 @@ begin
           -- falling edge of slot_occ_in
           get_table           <= '1';
           bus_data_out        <= table_counts_in;
-          slot_casenctrl_out  <= table_casenctrl_in;
           slot_round_done_out <= table_round_done_in;
           -- potentionally this is the last table in this row
           -- will be blocked by further PEs if they prepare a table themselves

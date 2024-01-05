@@ -37,7 +37,6 @@ port (
    -- Input: pair stream
    genotypeA_in : in genotype_block_t;
    genotypeB_in : in genotype_block_t;
-   casenctrlAB_in : in std_logic; -- '1' case, '0' ctrl
    new_genotypeAB_in : in std_logic;
    snp_doneAB_in : in std_logic;
    round_doneAB_in : in std_logic;
@@ -49,8 +48,6 @@ port (
    table_ready_out : out std_logic := '0';
    -- get next counters (FWFT behaviour)
    get_table_in : in std_logic;
-   -- indicates if table is for case (1) or controls (0)
-   table_casenctrl_out : out std_logic;
    -- indicates if this is the last table of this round from this PE
    table_round_done_out : out std_logic;
    -- all counters in parts of TRANSPORT_BUS_WIDTH bits
@@ -70,15 +67,26 @@ signal round_doneAB_del : std_logic := '0';
 
 signal table_ready : std_logic := '0'; 
 signal save : std_logic_vector(NUM_COUNTERS_TRANSFERRED*CTABLE_ENTRY_WIDTH-1 downto 0) := (others => '0');
-signal casenctrl_save : std_logic := '0';
+
+type myTable is array (natural range <>) of unsigned(CTABLE_ENTRY_WIDTH-1 downto 0);
+
+signal save2 : myTable(NUM_COUNTERS_TRANSFERRED-1 downto 0);
+
+signal tablefetch_debug : integer range 0 to 1 := 0;
 
 begin
+    
+    save2(0) <= unsigned(save(15 downto 0));
+
+save2_g : for I in 0 to NUM_COUNTERS_TRANSFERRED - 1 generate
+   save2(I) <= unsigned(save((I+1)*CTABLE_ENTRY_WIDTH-1 downto I*CTABLE_ENTRY_WIDTH));
+end generate save2_g;    
+
 
 gpairs_g : for I in 0 to GENOTYPES_PER_CYCLE - 1 generate
    genotype_pairs(I) <= genotypeA_in(I) & genotypeB_in(I);
 end generate gpairs_g;
 
-table_casenctrl_out <= casenctrl_save;
 table_counts_out <= save(TRANSPORT_BUS_WIDTH-1 downto 0);-- when table_ready = '1' else (others => '1');
 table_ready_out <= table_ready;
 
@@ -122,9 +130,7 @@ begin
             & std_logic_vector(n10) --*
             & std_logic_vector(n02)
             & std_logic_vector(n01) --*
-            & std_logic_vector(n00);
-              
-      casenctrl_save <= casenctrl_old;
+            & std_logic_vector(n00);              
    end if;
    
    -- fetch table
@@ -139,7 +145,7 @@ begin
 --      end if;
    end if;
    
-   if snp_doneAB_del = '1' or (casenctrl_old = '1' and casenctrlAB_in = '0' and new_genotypeAB_in = '1') then
+   if snp_doneAB_del = '1' then
             
       n00 := (others => '0');
       n01 := (others => '0');
@@ -199,9 +205,6 @@ begin
       n20 := n20 + n20_inc;
       n21 := n21 + n21_inc;
       n22 := n22 + n22_inc;
-  
-      -- save state of casenctrl
-      casenctrl_old <= casenctrlAB_in;
       
    end if;
    
@@ -219,7 +222,9 @@ begin
       n20 := (others => '0');
       n21 := (others => '0');
       n22 := (others => '0');
-   end if;
+  end if;
+  
+  tablefetch_debug <= tobefetched;
       
 end process cnt_p;
 
