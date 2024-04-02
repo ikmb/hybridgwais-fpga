@@ -28,17 +28,17 @@ package ad8k5_2way_ctables_info is
 subtype field_t is std_logic_vector(15 downto 0);
 
 constant INFO_APP_ID : std_logic_vector(7 downto 0) := x"02"; -- application identifier for 2-way interactions
-constant INFO_VERSION_MAJOR : std_logic_vector(7 downto 0) := x"02";
-constant INFO_VERSION_MINOR : std_logic_vector(7 downto 0) := x"02";
-constant INFO_VERSION_REVISION : std_logic_vector(7 downto 0) := x"02";
+constant INFO_VERSION_MAJOR : std_logic_vector(7 downto 0) := x"03";
+constant INFO_VERSION_MINOR : std_logic_vector(7 downto 0) := x"00";
+constant INFO_VERSION_REVISION : std_logic_vector(7 downto 0) := x"00";
          
 constant INFO_STREAM_FREQUENCY : std_logic_vector(31 downto 0) := x"0FDAD680"; -- 266 MHz
          
 constant INFO_NUM_CHAINS : field_t := std_logic_vector(to_unsigned(NUM_CHAINS,16));
 constant INFO_NUM_PE_PER_CHAIN : field_t := std_logic_vector(to_unsigned(NUM_PE_PER_CHAIN,16));
 
-constant INFO_TABLE_SIZE : field_t := x"002C"; -- in bytes (may include padding)
-constant INFO_NUM_TABLE_ENTRIES : field_t := std_logic_vector(to_unsigned(2*NUM_COUNTERS_TRANSFERRED,16));
+constant INFO_TABLE_SIZE : field_t := x"001A"; -- in bytes (may include padding)
+constant INFO_NUM_TABLE_ENTRIES : field_t := std_logic_vector(to_unsigned(NUM_COUNTERS_TRANSFERRED,16));
 constant INFO_NUM_TABLE_ENTRY_SIZE : field_t := std_logic_vector(to_unsigned(CTABLE_ENTRY_WIDTH,16)); -- in bits
 
 constant INFO_RESERVED0 : field_t := x"0000";
