@@ -58,7 +58,7 @@ entity SNP_Reader is
       dram_rd_data_end   : in  std_logic; -- DRAM read data end
       dram_rd_data_valid : in  std_logic; -- DRAM read data valid
 
-      dbg_out            : out std_logic_vector(127 downto 0)
+      dbg_out            : out std_logic_vector(127 downto 0) := (others => '0')
    );
 end SNP_Reader;
 
@@ -112,13 +112,13 @@ architecture Behavioral of SNP_Reader is
    -- for simulation only
    signal snp_count_dbg         : unsigned(31 downto 0) := (others => '0');
    signal round_count_dbg : unsigned(31 downto 0) := (others => '0');
+   
+   signal shiftcount_dbg : integer range 0 to (256/GENOTYPES_PER_CYCLE)-1 := 0;
+   signal sample_count_dbg : unsigned(31 - LOG_GENOTYPES_PER_CYCLE downto 0) := (0 => '1', others => '0');
 
 begin
 
    constant_init_p : process
---      variable num_samples_tig    : unsigned(31 downto 0); -- TIG!
---      variable num_cases_tig      : unsigned(31 downto 0); -- TIG!
---      variable num_snps_local_tig : unsigned(31 downto 0); -- TIG!
    begin
       wait until rising_edge(ram_clk);
 
@@ -297,7 +297,9 @@ begin
                end if;
 
             when INSERT =>
-               if dram_read_request = '0' and (flagfifo_full = '0' or set_new_snp = '0') and mem_req_flag = mem_proc_flag then -- already processed reply
+               if dram_read_request = '0' and
+                 (flagfifo_full = '0' or set_new_snp = '0') and 
+                 mem_req_flag = mem_proc_flag then -- already processed reply
                   -- ready for a new commmand
                   -- (if one command is entered, it will be removed almost immediately by the
                   --  controller, but it takes time for the answer to appear at the read FIFO.
@@ -360,6 +362,7 @@ begin
       variable dec_set_round_done   : std_logic                   := '0';
       variable dec_set_new_snp    : std_logic                     := '0';
       variable dec_wr_req         : boolean                       := false;
+      
       -- DEBUG
       variable dec_wr_en_cnt : unsigned(63 downto 0) := (others => '0');
    begin
@@ -381,10 +384,12 @@ begin
          
 
          if dec_wr_req and dec_full = '0' then -- and dec_wr_en = '0' then
-           dec_wr_en     <= '1';
-           dec_wr_en_cnt := dec_wr_en_cnt + 1;
+            dec_wr_en     <= '1';
             dec_wr_req    := false;
             mem_proc_flag <= not mem_proc_flag;
+            
+            -- DEBUG
+            dec_wr_en_cnt := dec_wr_en_cnt + 1;
          end if;
          
          if mem_rd_data_valid = '1' then
@@ -496,11 +501,13 @@ begin
             genotype_block(511-2*GENOTYPES_PER_CYCLE downto 0) <= genotype_block(511 downto 2*GENOTYPES_PER_CYCLE);
             shiftcount     := shiftcount - 1;
             sample_count   := sample_count + 1;
+            
             if sample_count /= num_samples then
                new_genotype <= '1';
             else
                shiftcount := 0;
-            end if;
+           end if;
+           
             -- last sample of SNP (same as above)
             if sample_count = num_samples - 1 then
                snp_done_out   <= '1';
@@ -509,7 +516,11 @@ begin
             end if;
          end if;
 
-      end if;
+     end if;
+     
+     -- Simulation DEBUG
+     shiftcount_dbg <= shiftcount;
+     sample_count_dbg <= sample_count;
 
    end process stream_p;
    new_genotype_out <= new_genotype;
