@@ -71,12 +71,18 @@ signal save : std_logic_vector(NUM_COUNTERS_TRANSFERRED*CTABLE_ENTRY_WIDTH-1 dow
 type myTable is array (natural range <>) of unsigned(CTABLE_ENTRY_WIDTH-1 downto 0);
 
 signal save2 : myTable(NUM_COUNTERS_TRANSFERRED-1 downto 0);
+signal save_sum : unsigned(CTABLE_ENTRY_WIDTH-1 downto 0);
+signal n3x : unsigned(CTABLE_ENTRY_WIDTH - 1 downto 0) := (others => '0'); -- DEBUG
+signal nx3 : unsigned(CTABLE_ENTRY_WIDTH - 1 downto 0) := (others => '0'); -- DEBUG
+signal n33 : unsigned(CTABLE_ENTRY_WIDTH - 1 downto 0) := (others => '0'); -- DEBUG
 
 signal tablefetch_debug : integer range 0 to 1 := 0;
 
 begin
     
     save2(0) <= unsigned(save(15 downto 0));
+    save_sum <= save2(0) + save2(1) + save2(2) + save2(3) + save2(4) + save2(5) + save2(6) + save2(7) + save2(8);
+
 
 save2_g : for I in 0 to NUM_COUNTERS_TRANSFERRED - 1 generate
    save2(I) <= unsigned(save((I+1)*CTABLE_ENTRY_WIDTH-1 downto I*CTABLE_ENTRY_WIDTH));
@@ -101,6 +107,10 @@ cnt_p: process
   variable n21 : unsigned(CTABLE_ENTRY_WIDTH - 1 downto 0) := (others => '0');
   variable n22 : unsigned(CTABLE_ENTRY_WIDTH - 1 downto 0) := (others => '0');
   
+--  variable n3x : unsigned(CTABLE_ENTRY_WIDTH - 1 downto 0) := (others => '0'); -- DEBUG
+--  variable nx3 : unsigned(CTABLE_ENTRY_WIDTH - 1 downto 0) := (others => '0'); -- DEBUG
+--  variable n33 : unsigned(CTABLE_ENTRY_WIDTH - 1 downto 0) := (others => '0'); -- DEBUG
+  
   variable n00_inc : integer range 0 to GENOTYPES_PER_CYCLE := 0;
   variable n01_inc : integer range 0 to GENOTYPES_PER_CYCLE := 0;
   variable n02_inc : integer range 0 to GENOTYPES_PER_CYCLE := 0;
@@ -110,6 +120,10 @@ cnt_p: process
   variable n20_inc : integer range 0 to GENOTYPES_PER_CYCLE := 0;
   variable n21_inc : integer range 0 to GENOTYPES_PER_CYCLE := 0;
   variable n22_inc : integer range 0 to GENOTYPES_PER_CYCLE := 0;
+  
+  variable n3x_inc : integer range 0 to GENOTYPES_PER_CYCLE := 0; -- DEBUG
+  variable nx3_inc : integer range 0 to GENOTYPES_PER_CYCLE := 0; -- DEBUG
+  variable n33_inc : integer range 0 to GENOTYPES_PER_CYCLE := 0; -- DEBUG
       
   -- including missing values
   variable tobefetched : integer range 0 to 1 := 0;
@@ -132,6 +146,10 @@ begin
             & std_logic_vector(n01) --*
             & std_logic_vector(n00);              
    end if;
+   
+--    save_illegal(0) <= n3x; -- DEBUG
+--    save_illegal(1) <= nx3; -- DEBUG
+--    save_illegal(2) <= n33; -- DEBUG
    
    -- fetch table
    if get_table_in = '1' then
@@ -157,6 +175,10 @@ begin
       n21 := (others => '0');
       n22 := (others => '0');
       
+      n3x <= (others => '0');
+      nx3 <= (others => '0');
+      n33 <= (others => '0');
+      
       table_ready <= '1';
       table_round_done_out <= round_doneAB_del;
       tobefetched := 1;
@@ -178,6 +200,10 @@ begin
       n21_inc := 0;
       n22_inc := 0;
       
+      n3x_inc := 0;
+      nx3_inc := 0;
+      n33_inc := 0;
+      
       -- choose increment
       for I in 0 to GENOTYPES_PER_CYCLE - 1 loop
          case genotype_pairs(I) is
@@ -190,6 +216,14 @@ begin
          when "1000" => n20_inc := n20_inc + 1; -- 020
          when "1001" => n21_inc := n21_inc + 1; -- 021
          when "1010" => n22_inc := n22_inc + 1; -- 022
+         
+         when "1100" => n3x_inc := n3x_inc + 1;
+         when "1101" => n3x_inc := n3x_inc + 1;
+         when "1110" => n3x_inc := n3x_inc + 1;
+         when "0011" => nx3_inc := nx3_inc + 1;
+         when "1011" => nx3_inc := nx3_inc + 1;
+         when "0111" => nx3_inc := nx3_inc + 1;
+         when "1111" => n33_inc := n33_inc + 1;
          when others => -- unrequired or unsupported genotype pair (not counted)
             null;
          end case;
@@ -205,6 +239,10 @@ begin
       n20 := n20 + n20_inc;
       n21 := n21 + n21_inc;
       n22 := n22 + n22_inc;
+      
+      n3x <= n3x + n3x_inc;
+      nx3 <= nx3 + nx3_inc;
+      n33 <= n33 + n33_inc;
       
    end if;
    
@@ -222,6 +260,10 @@ begin
       n20 := (others => '0');
       n21 := (others => '0');
       n22 := (others => '0');
+      
+      n3x <= (others => '0');
+      nx3 <= (others => '0');
+      n33 <= (others => '0');
   end if;
   
   tablefetch_debug <= tobefetched;

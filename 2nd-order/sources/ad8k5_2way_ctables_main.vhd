@@ -592,8 +592,10 @@ begin
             idBm1(C) := idBm1(C) + 1;
             -- jump if SNPReader also jumped here#
             -- apparently a simple signed comparison does not work here... need to check also if stream_start_snpidx is not zero
-            if stream_start_snpidx_gt0 and idBm1(C) = next_round_first_idAm1(C) and next_round_first_idAm1(C) < stream_start_snpidx_m1 then
-              idBm1(C) := stream_start_snpidx_m1;
+            if stream_start_snpidx_gt0 and
+               idBm1(C) = next_round_first_idAm1(C) and 
+               next_round_first_idAm1(C) < stream_start_snpidx_m1 then
+                idBm1(C) := stream_start_snpidx_m1;
             end if;
           end if;
           -- reset A
@@ -746,7 +748,7 @@ width_conv_i: entity work.conv_352_256_Wrapper
     s_axis_tvalid => ctchain_table_read(C),
     s_axis_tready => width_conv_ready(C),
     s_axis_tdata(207 downto 0)  => table(C), --table_dbg(C),
-    s_axis_tdata(351 downto 208) => (others => '0'), -- TODO is to stay compatible to the old interface
+    --s_axis_tdata(351 downto 208) => (others => '0'), -- TODO is to stay compatible to the old interface
     s_axis_tlast  => width_conv_tlast(C),
     m_axis_tvalid => dma_dout_tvalid(C),
     m_axis_tready => dma_dout_tready(C),

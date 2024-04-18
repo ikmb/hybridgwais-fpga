@@ -234,75 +234,115 @@ begin
    
    wait until rising_edge(clk);
    dma0_m_axis_tdata <= constants1_2_dma_word(
-       64, -- num_samples_rounded
+       512, -- num_samples_rounded
        0, -- dc -- num_cases_rounded
        10, -- num_snps
-       16#0000_0010#, -- last_init_snpidx
-       16#0000_0006#, -- stream_start_snpidx
+       16#0000_0009#, -- last_init_snpidx
+       16#0000_0000#, -- stream_start_snpidx
        16#0000_0000#, -- stream_start_addr 30 Bit!
-       16#0000_0040#  -- round_addr_offset 30 Bit!
+       16#0000_0080#  -- round_addr_offset 30 Bit!
    );
 
  
    wait until rising_edge(clk);
    -- 1GB buffer size, 12 initialization data words
    dma0_m_axis_tdata <= constants2_2_dma_word(
-       19, -- last_raw_gt_word -- 256 PCIe word from host to FPGA
-       16#0080_0000#, -- ctable_io_bufsize_outwords -- die Anzahl der zu sendenen PCIe Wörter
-       16#003c_3c3c#  -- ctable_io_bufsize_tablewords
+       39, -- last_raw_gt_word -- 256 PCIe word from host to FPGA
+       16#0000_299A#, -- ctable_io_bufsize_outwords -- die Anzahl der zu sendenen PCIe Wörter
+       16#0000_3333#  -- ctable_io_bufsize_tablewords
    );
    
    -- Every SNP must be aligned with a RAM-Word of 512 = 2*dma words
+   wait until rising_edge(clk); -- SNP 0
+   dma0_m_axis_tdata <= x"1005404500445145141004411011211844544044054400500104004104201501";
    wait until rising_edge(clk);
-   dma0_m_axis_tdata <= x"00000000000000000000000000000000AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+   dma0_m_axis_tdata <= x"0441050000104144140400001001400001004100140840024441400040011244";
    wait until rising_edge(clk);
-   dma0_m_axis_tdata <= x"FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF";
+   dma0_m_axis_tdata <= x"5519408511011054140402004144444011410410008550000010041454001544";
+   wait until rising_edge(clk);
+   dma0_m_axis_tdata <= x"ffffffffffffffffffffffffffffffffffffffffffffffffffffcf4250544010";
    
+   wait until rising_edge(clk); -- SNP 1
+   dma0_m_axis_tdata <= x"4040800000000044000400100000000000011004001000000200101400104500";
    wait until rising_edge(clk);
-   dma0_m_axis_tdata <= x"0000000000000000000000000000000055555555555555555555555555555555";
+   dma0_m_axis_tdata <= x"1101000110400000000000000000001000000000000000000000000000000005";
    wait until rising_edge(clk);
-   dma0_m_axis_tdata <= x"FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF";
+   dma0_m_axis_tdata <= x"0001000004000000000401100404041004100000010010410000500000141004";
+   wait until rising_edge(clk);
+   dma0_m_axis_tdata <= x"ffffffffffffffffffffffffffffffffffffffffffffffffffffcf0100000400";
    
+   wait until rising_edge(clk); -- SNP 2
+   dma0_m_axis_tdata <= x"0000000000000001000000000400000000000000000000000000000000000000";
    wait until rising_edge(clk);
-   dma0_m_axis_tdata <= x"00000000000000000000000000000000AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
-   wait until rising_edge(clk);
-   dma0_m_axis_tdata <= x"FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF";
-   
-   wait until rising_edge(clk);
-   dma0_m_axis_tdata <= x"0000000000000000000000000000000055555555555555555555555555555555";
-   wait until rising_edge(clk);
-   dma0_m_axis_tdata <= x"FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF";
-   
-   wait until rising_edge(clk);
-   dma0_m_axis_tdata <= x"00000000000000000000000000000000AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
-   wait until rising_edge(clk);
-   dma0_m_axis_tdata <= x"FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF";
-   
-   wait until rising_edge(clk);
-   dma0_m_axis_tdata <= x"0000000000000000000000000000000055555555555555555555555555555555";
-   wait until rising_edge(clk);
-   dma0_m_axis_tdata <= x"FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF";
-   
-   wait until rising_edge(clk);
-   dma0_m_axis_tdata <= x"00000000000000000000000000000000AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
-   wait until rising_edge(clk);
-   dma0_m_axis_tdata <= x"FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF";
-   
-   wait until rising_edge(clk);
-   dma0_m_axis_tdata <= x"0000000000000000000000000000000055555555555555555555555555555555";
-   wait until rising_edge(clk);
-   dma0_m_axis_tdata <= x"FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF";
-
+   dma0_m_axis_tdata <= x"0000000000000000000000000000000000000000000004000000000000000000";
    wait until rising_edge(clk);
    dma0_m_axis_tdata <= x"0000000000000000000000000000000000000000000000000000000000000000";
    wait until rising_edge(clk);
-   dma0_m_axis_tdata <= x"FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF";
+   dma0_m_axis_tdata <= x"ffffffffffffffffffffffffffffffffffffffffffffffffffffcf0000000000";
    
+   wait until rising_edge(clk); -- SNP 3
+   dma0_m_axis_tdata <= x"0000080147104000040010410410804000040000104001000000000000000000";
+   wait until rising_edge(clk);
+   dma0_m_axis_tdata <= x"000000c000004048000000014000010400040000000410001000000040050400";
+   wait until rising_edge(clk);
+   dma0_m_axis_tdata <= x"0004000080401140040120004000000001004100000000001011300104400001";
+   wait until rising_edge(clk);
+   dma0_m_axis_tdata <= x"ffffffffffffffffffffffffffffffffffffffffffffffffffffcf5001040000";
+   
+   wait until rising_edge(clk); -- SNP 4
+   dma0_m_axis_tdata <= x"0000000000000000000000000000000000000000000000000000000000000000";
+   wait until rising_edge(clk);
+   dma0_m_axis_tdata <= x"0000000000004000000000000000000001000000000000000000000000000000";
+   wait until rising_edge(clk);
+   dma0_m_axis_tdata <= x"0000000001000000000000000000000000000000000000000000000000000000";
+   wait until rising_edge(clk);
+   dma0_m_axis_tdata <= x"ffffffffffffffffffffffffffffffffffffffffffffffffffffcf0000000000";
+   
+   wait until rising_edge(clk); -- SNP 5
+   dma0_m_axis_tdata <= x"0000000000000000000000000000000000000000000000000000000000000000";
    wait until rising_edge(clk);
    dma0_m_axis_tdata <= x"0000000000000000000000000000000000000000000000000000000000000000";
    wait until rising_edge(clk);
-   dma0_m_axis_tdata <= x"FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF";
-
+   dma0_m_axis_tdata <= x"0000000000000000000000000000000000000000000000000000000000000000";
+   wait until rising_edge(clk);
+   dma0_m_axis_tdata <= x"ffffffffffffffffffffffffffffffffffffffffffffffffffffcf0000000000";
+   
+   wait until rising_edge(clk); -- SNP 6
+   dma0_m_axis_tdata <= x"0000000000000000000000000000000000000000100000000000000000000000";
+   wait until rising_edge(clk);
+   dma0_m_axis_tdata <= x"0000000000000000000000000000000000000000000040000001014000000000";
+   wait until rising_edge(clk);
+   dma0_m_axis_tdata <= x"0000000000000000000000000000010000001000000000000000000000000400";
+   wait until rising_edge(clk);
+   dma0_m_axis_tdata <= x"ffffffffffffffffffffffffffffffffffffffffffffffffffffcf0000000000";
+   
+   wait until rising_edge(clk); -- SNP 7
+   dma0_m_axis_tdata <= x"0000000000010004000010000000000000000000000000000000000000000400";
+   wait until rising_edge(clk);
+   dma0_m_axis_tdata <= x"0000000000000000000000010000000040000000000001000100000000000400";
+   wait until rising_edge(clk);
+   dma0_m_axis_tdata <= x"0000000000001000000010000110000000000004000000100000000100001000";
+   wait until rising_edge(clk);
+   dma0_m_axis_tdata <= x"ffffffffffffffffffffffffffffffffffffffffffffffffffffcf0000400000";
+   
+   wait until rising_edge(clk); -- SNP 8
+   dma0_m_axis_tdata <= x"41001500040100001000410000015400104000020411400800100000505200e0";
+   wait until rising_edge(clk);
+   dma0_m_axis_tdata <= x"0000040000000501000085004000004040040100004001101005400100004405";
+   wait until rising_edge(clk);
+   dma0_m_axis_tdata <= x"0004110400500440100100144204010100001000000000400448100410010440";
+   wait until rising_edge(clk);
+   dma0_m_axis_tdata <= x"ffffffffffffffffffffffffffffffffffffffffffffffffffffcf0010000000";
+   
+   wait until rising_edge(clk); -- SNP 9
+   dma0_m_axis_tdata <= x"00000000000000c0000000000000000000000000000000000000000000000000";
+   wait until rising_edge(clk);
+   dma0_m_axis_tdata <= x"3000000000000000000000000000000000000000000000000000000000000000";
+   wait until rising_edge(clk);
+   dma0_m_axis_tdata <= x"0000000000000000000000000000000000000000000000000000000000000000";
+   wait until rising_edge(clk);
+   dma0_m_axis_tdata <= x"ffffffffffffffffffffffffffffffffffffffffffffffffffffcf0000000000";
+   
    
    wait until rising_edge(clk);
    

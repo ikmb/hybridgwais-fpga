@@ -93,7 +93,7 @@ architecture Behavioral of SNP_Reader is
    signal dec_full  : std_logic;
    signal dec_empty : std_logic;
 
-   signal genotype_block : std_logic_vector(511 downto 0) := (others => '0');
+   signal genotype_block : std_logic_vector(511 downto 0) := (others => '1');
    signal new_genotype : std_logic := '0';
 
    signal mem_busy : std_logic := '0';
