@@ -56,9 +56,9 @@ end CollectTables;
 
 architecture Behavioral of CollectTables is
 
--- TODO is del the suffix for a delayed signal?
 signal bus_data_in_del : half_table_t;
 signal small_round_done : std_logic;
+signal row_done : std_logic;
 
 -- buffer that holds all finished tables from one chain
 signal out_buffer_we : std_logic := '0';
@@ -86,11 +86,13 @@ port map (
    rd_clk => table_read_clk,
    rd_rst => table_read_clk_reset,
    din(143 downto 0) => bus_data_in_del,
-   din(144) => '0', -- leftover from old case/ctrl impl. just to stay with the interface
+   din(144) => small_round_done,
+   din(145) => row_done,
    wr_en => out_buffer_we,
    rd_en => out_buffer_re,
    dout(143 downto 0) => out_buffer_dout,
    dout(144) => table_small_round_done,
+   dout(145) => table_row_done,
    full => out_buffer_full,
    empty => out_buffer_empty,
    prog_full => stall_out -- asserted if only 1024 entries left
@@ -114,6 +116,7 @@ begin
    if slot_occ_in = '1' then
      bus_data_in_del <= bus_data_in;
      small_round_done <= slot_round_done_in;
+     row_done <= slot_row_done_in;
      out_buffer_we <= '1';
    end if;
    
