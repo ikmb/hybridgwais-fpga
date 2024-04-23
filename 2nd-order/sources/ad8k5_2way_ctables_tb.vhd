@@ -249,7 +249,7 @@ begin
    dma0_m_axis_tdata <= constants2_2_dma_word(
        39, -- last_raw_gt_word -- 256 PCIe word from host to FPGA
        16#0000_299A#, -- ctable_io_bufsize_outwords -- die Anzahl der zu sendenen PCIe Wörter
-       16#0000_3333#  -- ctable_io_bufsize_tablewords
+       16#0000_001F#  -- ctable_io_bufsize_tablewords
    );
    
    -- Every SNP must be aligned with a RAM-Word of 512 = 2*dma words
