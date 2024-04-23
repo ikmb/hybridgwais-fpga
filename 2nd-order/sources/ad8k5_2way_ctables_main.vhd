@@ -747,8 +747,7 @@ width_conv_i: entity work.conv_352_256_Wrapper
     aresetn       => not pci_clk_sync_reset,
     s_axis_tvalid => ctchain_table_read(C),
     s_axis_tready => width_conv_ready(C),
-    s_axis_tdata(207 downto 0)  => table(C), --table_dbg(C),
-    --s_axis_tdata(351 downto 208) => (others => '0'), -- TODO is to stay compatible to the old interface
+    s_axis_tdata  => table(C), --table_dbg(C),
     s_axis_tlast  => width_conv_tlast(C),
     m_axis_tvalid => dma_dout_tvalid(C),
     m_axis_tready => dma_dout_tready(C),
