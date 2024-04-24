@@ -92,12 +92,15 @@ begin
      else -- all other PEs
      
         bus_data_out <= bus_data_in;
+        
         -- the "round done" information of the previous PE is only forwarded if this PE 
         -- does not have a table ready since it would carry the same information again 
         slot_round_done_out <= slot_round_done_in and not table_ready_in;
+        
         -- "row done" indicates the last table from this chain, hence it is forwarded only if
         -- this PE does not prepare a table as well.
-        slot_row_done_out <= slot_row_done_in and not table_busy_in;
+        -- slot_row_done_out <= slot_row_done_in and not table_busy_in; -- OLD
+        slot_row_done_out <= slot_row_done_in and not table_ready_in;
         
         if slot_occ_del = '1' and slot_occ_in = '0' then
           -- falling edge of slot_occ_in
