@@ -252,6 +252,11 @@ begin
        16#0000_001F#  -- ctable_io_bufsize_tablewords
    );
    
+   -- simulate that the host took a while
+   wait until rising_edge(clk);
+   wait until rising_edge(clk);
+   wait until rising_edge(clk);
+   
    -- Every SNP must be aligned with a RAM-Word of 512 = 2*dma words
    wait until rising_edge(clk); -- SNP 0
    dma0_m_axis_tdata <= x"1005404500445145141004411011211844544044054400500104004104201501";
@@ -350,6 +355,15 @@ begin
    
    wait;
    
- end process tb_p;
+end process tb_p;
+
+print_p: process
+begin
+    wait until rising_edge(clk);
+    
+    if dma1_s_axis_tvalid = '1' then
+        report "0x" & to_hstring(TO_BITVECTOR(dma1_s_axis_tdata));
+    end if;
+end process print_p;
    
 end Behavioral;
