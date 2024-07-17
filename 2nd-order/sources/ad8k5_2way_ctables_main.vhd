@@ -760,14 +760,14 @@ end generate chain_out_g;
 
 -- map DMA channels to PE chains
 dma_dout1_tdata <= dma_dout_tdata(0);
-dma_dout2_tdata <= dma_dout_tdata(1);
+dma_dout2_tdata <= (others => '0'); -- TODO remove
 
 -- send data whenever it is desired, padding is required or the DMA engine is ready during reset
 dma_dout1_tvalid <= (dma_dout_tvalid(0) or dma_ins_pad(0) or host_reset_pciclk) and dma_dout_tready(0);
-dma_dout2_tvalid <= (dma_dout_tvalid(1) or dma_ins_pad(1) or host_reset_pciclk) and dma_dout_tready(1);
+dma_dout2_tvalid <= '0'; -- (dma_dout_tvalid(1) or dma_ins_pad(1) or host_reset_pciclk) and dma_dout_tready(1);
 
 dma_dout_tready(0) <= dma_dout1_tready;
-dma_dout_tready(1) <= dma_dout2_tready;
+--dma_dout_tready(1) <= dma_dout2_tready; -- TODO remove
 
 status(0) <= snpreader_busy;
 status(1) <= not process_finished_ramclk;
@@ -902,9 +902,9 @@ reg_dout <= reg_dout_dbg;
           
           --  47.. 0 case_wr chain 1
           -- 111..64 ctrl_wr chain 1
-          reg_dout_dbg(127 downto 0) <= ctchain_debug_tig(1);
-          reg_dout_dbg(175 downto 128) <= std_logic_vector(tbuf_table_count_tig(1));
-          reg_dout_dbg(239 downto 192) <= std_logic_vector(tbuf_word_count_tig(1) );
+          -- reg_dout_dbg(127 downto 0) <= ctchain_debug_tig(1); -- TODO remove
+          -- reg_dout_dbg(175 downto 128) <= std_logic_vector(tbuf_table_count_tig(1)); -- TODO remove
+          -- reg_dout_dbg(239 downto 192) <= std_logic_vector(tbuf_word_count_tig(1) ); -- TODO remove
 
         when 5 => 
           reg_we_dbg                   <= '1';

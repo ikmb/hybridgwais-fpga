@@ -27,7 +27,7 @@ package ad8k5_2way_ctables_pkg is
 -- ATTENTION! Increase FIFO sizes and adjust stall limit in CollectTables.vhd if increasing the number of PEs
 -- Example: 500 PEs need a stall limit of 1000, i.e. a free space of 1000 tables in each FIFO.
 constant NUM_PE_PER_CHAIN : integer := 4; -- 250 is maximum for WTCCC (2000 cases), 8gts/cycle and one table/cycle
-constant NUM_CHAINS : integer := 2; -- other changes required in VirtualFIFOArbiter
+constant NUM_CHAINS : integer := 1; -- other changes required in VirtualFIFOArbiter
 constant NUM_PE : integer := NUM_CHAINS * NUM_PE_PER_CHAIN;
 constant GENOTYPES_PER_CYCLE : integer := 8; -- must be a power of 2 -> when changing, update ReReadableFIFO!
 constant LOG_GENOTYPES_PER_CYCLE : integer := 3; -- base-2 logarithm of GENOTYPES_PER_CYCLE
