@@ -63,6 +63,7 @@ type integer_vector is array (natural range <>) of integer;
 type boolean_vector is array (natural range <>) of boolean;
 
 type debug_vector is array (natural range <>) of std_logic_vector(127 downto 0);
+type dbg_count_vector is array (natural range <>) of unsigned(47 downto 0);
 
 end ad8k5_2way_ctables_pkg;
 
