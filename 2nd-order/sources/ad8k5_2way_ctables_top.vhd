@@ -256,6 +256,8 @@ architecture Behavioral of ad8k5_2way_ctables_top is
   signal dma3_s_axis_tvalid : std_logic;
   signal dma3_s_axis_tready : std_logic;
 
+  signal core_status : std_logic_vector(63 DOWNTO 0);
+
   signal s_axi_awaddr      : std_logic_vector(63 downto 0);
   signal s_axi_awlen       : std_logic_vector(7 downto 0);
   signal s_axi_awsize      : std_logic_vector(2 downto 0);
