@@ -112,58 +112,73 @@ architecture Behavioral of ad8k5_2way_ctables_main is
   signal host_reset_cycle_cnt : unsigned(47 downto 0) := (others => '0');
   signal host_reset_cnt       : unsigned(15 downto 0) := (others => '0');
 
+  signal ctable_io_bufsize_outwords_tig_ramclk   : unsigned(31 downto 0); -- directly sampled from input with TIG constraint "to" in ramclk domain
+  signal ctable_io_bufsize_tablewords_tig_ramclk : unsigned(31 downto 0); -- directly sampled from input with TIG constraint "to" in ramclk domain
+
+  signal num_samples_rounded_tig : unsigned(31 downto 0);
+  signal num_cases_rounded_tig   : unsigned(31 downto 0);
+  signal num_snps_local_tig      : unsigned(31 downto 0);
+  signal last_init_snpidx_tig    : unsigned(31 downto 0); --inclusive
+  signal stream_start_snpidx_tig : unsigned(31 downto 0);
+  signal stream_start_addr_tig   : unsigned(29 downto 0);
+  signal round_addr_offset_tig   : unsigned(29 downto 0);
+
 begin
 
   engine_0 : entity work.Engine
     port map(
-      reset                        => reset,
-      pci_clk                      => pci_clk,
-      ram_clk                      => ram_clk0, -- clk for c0
+      reset                                       => reset,
+      pci_clk                                     => pci_clk,
+      ram_clk                                     => ram_clk0, -- clk for c0
 
       -- PCIe DMA access
-      dma_din_tdata                => dma_din0_tdata,
-      dma_din_tvalid               => dma_din0_tvalid,
-      dma_din_tready               => dma_din0_tready,
-      dma_dout_tdata               => dma_dout1_tdata,
-      dma_dout_tvalid              => dma_dout1_tvalid,
-      dma_dout_tready              => dma_dout1_tready,
-
-
-      host_reset_sig               => host_reset_sig,
-
+      dma_din_tdata                               => dma_din0_tdata,
+      dma_din_tvalid                              => dma_din0_tvalid,
+      dma_din_tready                              => dma_din0_tready,
+      dma_dout_tdata                              => dma_dout1_tdata,
+      dma_dout_tvalid                             => dma_dout1_tvalid,
+      dma_dout_tready                             => dma_dout1_tready,
+      host_reset_sig                              => host_reset_sig,
       -- RAM interface
-      dram_addr                    => c0_app_addr,
-      dram_cmd                     => c0_app_cmd,
-      dram_en                      => c0_app_en,
-      dram_wdf_data                => c0_app_wdf_data,
-      dram_wdf_end                 => c0_app_wdf_end,
-      dram_wdf_wren                => c0_app_wdf_wren,
-      dram_rd_data                 => c0_app_rd_data,
-      dram_rd_data_end             => c0_app_rd_data_end,
-      dram_rd_data_valid           => c0_app_rd_data_valid,
-      dram_rdy                     => c0_app_rdy,
-      dram_wdf_rdy                 => c0_app_wdf_rdy,
-
+      dram_addr                                   => c0_app_addr,
+      dram_cmd                                    => c0_app_cmd,
+      dram_en                                     => c0_app_en,
+      dram_wdf_data                               => c0_app_wdf_data,
+      dram_wdf_end                                => c0_app_wdf_end,
+      dram_wdf_wren                               => c0_app_wdf_wren,
+      dram_rd_data                                => c0_app_rd_data,
+      dram_rd_data_end                            => c0_app_rd_data_end,
+      dram_rd_data_valid                          => c0_app_rd_data_valid,
+      dram_rdy                                    => c0_app_rdy,
+      dram_wdf_rdy                                => c0_app_wdf_rdy,
       -- status
-      status_snpreader_busy        => status_snpreader_busy,
-      status_process_finished      => status_process_finished,
-      status_inbuffer_empty        => status_inbuffer_empty,
-      status_inbuffer_full         => status_inbuffer_full,
-      status_dma_out_ready         => status_dma_out_ready,
-      status_host_reset_ramclk     => status_host_reset_ramclk,
-
+      status_snpreader_busy                       => status_snpreader_busy,
+      status_process_finished                     => status_process_finished,
+      status_inbuffer_empty                       => status_inbuffer_empty,
+      status_inbuffer_full                        => status_inbuffer_full,
+      status_dma_out_ready                        => status_dma_out_ready,
+      status_host_reset_ramclk                    => status_host_reset_ramclk,
       -- DBUG signals
-      dbg_tbuf_table_count         => tbuf_table_count_sig,
-      dbg_tbuf_word_count          => tbuf_word_count_sig,
-      dbg_snpreader_round_done_cnt => snpreader_round_done_cnt,
-      dbg_snpreader_snp_done_cnt   => snpreader_snp_done_cnt,
-      dbg_stall_cnt                => stall_cnt,
-      dbg_inbuffer_rd_cnt          => inbuffer_rd_cnt,
-      dbg_dram_rd_req_cnt          => c0_rd_req_cnt,
-      dbg_dram_rd_ans_cnt          => c0_rd_ans_cnt,
-      dbg_dram_conflict_cnt        => c0_conflict_cnt,
-      dbg_host_reset_cycle_cnt     => host_reset_cycle_cnt,
-      dbg_host_reset_cnt           => host_reset_cnt
+      dbg_tbuf_table_count                        => tbuf_table_count_sig,
+      dbg_tbuf_word_count                         => tbuf_word_count_sig,
+      dbg_snpreader_round_done_cnt                => snpreader_round_done_cnt,
+      dbg_snpreader_snp_done_cnt                  => snpreader_snp_done_cnt,
+      dbg_stall_cnt                               => stall_cnt,
+      dbg_inbuffer_rd_cnt                         => inbuffer_rd_cnt,
+      dbg_dram_rd_req_cnt                         => c0_rd_req_cnt,
+      dbg_dram_rd_ans_cnt                         => c0_rd_ans_cnt,
+      dbg_dram_conflict_cnt                       => c0_conflict_cnt,
+      dbg_host_reset_cycle_cnt                    => host_reset_cycle_cnt,
+      dbg_host_reset_cnt                          => host_reset_cnt,
+      dbg_ctable_io_bufsize_outwords_tig_ramclk   => ctable_io_bufsize_outwords_tig_ramclk,
+      dbg_ctable_io_bufsize_tablewords_tig_ramclk => ctable_io_bufsize_tablewords_tig_ramclk,
+      dbg_num_samples_rounded_tig                 => num_samples_rounded_tig,
+      dbg_num_cases_rounded_tig                   => num_cases_rounded_tig,
+      dbg_num_snps_local_tig                      => num_snps_local_tig,
+      dbg_last_init_snpidx_tig                    => last_init_snpidx_tig,
+      dbg_stream_start_snpidx_tig                 => stream_start_snpidx_tig,
+      dbg_stream_start_addr_tig                   => stream_start_addr_tig,
+      dbg_round_addr_offset_tig                   => round_addr_offset_tig
     );
 
   -- write the status register
@@ -222,25 +237,25 @@ begin
         reg_addr_intern <= std_logic_vector(to_unsigned(dbg_state + 1, 10)); -- debug register address
         dbg_state       := dbg_state + 1;
 
-        reg_dout_intern(47 downto 32)  <= std_logic_vector(host_reset_cnt);
-        reg_dout_intern(95 downto 48)  <= std_logic_vector(host_reset_cycle_cnt);
-        reg_dout_intern(127 downto 96) <= std_logic_vector(inbuffer_rd_cnt);
-      -- reg_dout_dbg(159 downto 128) <= std_logic_vector(ctable_io_bufsize_tablewords_tig_ramclk);
-      -- reg_dout_dbg(191 downto 160)  <= std_logic_vector(ctable_io_bufsize_outwords_tig_ramclk);
+        reg_dout_intern(47 downto 32)   <= std_logic_vector(host_reset_cnt);
+        reg_dout_intern(95 downto 48)   <= std_logic_vector(host_reset_cycle_cnt);
+        reg_dout_intern(127 downto 96)  <= std_logic_vector(inbuffer_rd_cnt);
+        reg_dout_intern(159 downto 128) <= std_logic_vector(ctable_io_bufsize_tablewords_tig_ramclk);
+        reg_dout_intern(191 downto 160) <= std_logic_vector(ctable_io_bufsize_outwords_tig_ramclk);
 
       when 2 =>
         reg_we_intern   <= '1';
         reg_addr_intern <= std_logic_vector(to_unsigned(dbg_state + 1, 10)); -- debug register address
         dbg_state       := dbg_state + 1;
 
-      -- reg_dout_dbg(95 downto  64) <= std_logic_vector(num_cases_rounded_tig);
-      -- reg_dout_dbg(63 downto  32) <= std_logic_vector(num_samples_rounded_tig);
-      -- reg_dout_dbg(31 downto   0) <= std_logic_vector(num_snps_local_tig);
+        reg_dout_intern(95 downto 64) <= std_logic_vector(num_cases_rounded_tig);
+        reg_dout_intern(63 downto 32) <= std_logic_vector(num_samples_rounded_tig);
+        reg_dout_intern(31 downto 0)  <= std_logic_vector(num_snps_local_tig);
 
-      -- reg_dout_dbg(253 downto 224) <= std_logic_vector(round_addr_offset_tig);
-      -- reg_dout_dbg(221 downto 192) <= std_logic_vector(stream_start_addr_tig);
-      -- reg_dout_dbg(191 downto 160) <= std_logic_vector(stream_start_snpidx_tig);
-      -- reg_dout_dbg(159 downto 128) <= std_logic_vector(last_init_snpidx_tig);
+        reg_dout_intern(253 downto 224) <= std_logic_vector(round_addr_offset_tig);
+        reg_dout_intern(221 downto 192) <= std_logic_vector(stream_start_addr_tig);
+        reg_dout_intern(191 downto 160) <= std_logic_vector(stream_start_snpidx_tig);
+        reg_dout_intern(159 downto 128) <= std_logic_vector(last_init_snpidx_tig);
 
       when 3 =>
         reg_we_intern   <= '1';

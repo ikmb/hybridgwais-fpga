@@ -26,50 +26,59 @@ use work.ad8k5_2way_ctables_pkg.all;
 entity Engine is
   port(
     -- Clocks / Reset
-    reset                        : in  std_logic;
-    pci_clk                      : in  std_logic;
-    ram_clk                      : in  std_logic;
+    reset                                       : in  std_logic;
+    pci_clk                                     : in  std_logic;
+    ram_clk                                     : in  std_logic;
     -- PCIe DMA
-    dma_din_tdata                : in  std_logic_vector(255 downto 0);
-    dma_din_tvalid               : in  std_logic;
-    dma_din_tready               : out std_logic;
-    dma_dout_tdata               : out std_logic_vector(255 downto 0);
-    dma_dout_tvalid              : out std_logic;
-    dma_dout_tready              : in  std_logic;
+    dma_din_tdata                               : in  std_logic_vector(255 downto 0);
+    dma_din_tvalid                              : in  std_logic;
+    dma_din_tready                              : out std_logic;
+    dma_dout_tdata                              : out std_logic_vector(255 downto 0);
+    dma_dout_tvalid                             : out std_logic;
+    dma_dout_tready                             : in  std_logic;
     -- TODO fragen mit host_reset_ramclk_p Process klären
-    host_reset_sig               : in  std_logic;
+    host_reset_sig                              : in  std_logic;
     -- DRAM
-    dram_addr                    : out std_logic_vector(29 downto 0);
-    dram_cmd                     : out std_logic_vector(2 downto 0);
-    dram_en                      : out std_logic;
-    dram_wdf_data                : out std_logic_vector(575 downto 0);
+    dram_addr                                   : out std_logic_vector(29 downto 0);
+    dram_cmd                                    : out std_logic_vector(2 downto 0);
+    dram_en                                     : out std_logic;
+    dram_wdf_data                               : out std_logic_vector(575 downto 0);
     -- dram_wdf_mask      : out std_logic_vector(71 downto 0);
-    dram_wdf_end                 : out std_logic;
-    dram_wdf_wren                : out std_logic;
-    dram_rd_data                 : in  std_logic_vector(575 downto 0);
-    dram_rd_data_end             : in  std_logic;
-    dram_rd_data_valid           : in  std_logic;
-    dram_rdy                     : in  std_logic;
-    dram_wdf_rdy                 : in  std_logic;
+    dram_wdf_end                                : out std_logic;
+    dram_wdf_wren                               : out std_logic;
+    dram_rd_data                                : in  std_logic_vector(575 downto 0);
+    dram_rd_data_end                            : in  std_logic;
+    dram_rd_data_valid                          : in  std_logic;
+    dram_rdy                                    : in  std_logic;
+    dram_wdf_rdy                                : in  std_logic;
     -- Status
-    status_snpreader_busy        : out std_logic;
-    status_process_finished      : out std_logic;
-    status_inbuffer_empty        : out std_logic;
-    status_inbuffer_full         : out std_logic;
-    status_dma_out_ready         : out std_logic;
-    status_host_reset_ramclk     : out std_logic;
+    status_snpreader_busy                       : out std_logic;
+    status_process_finished                     : out std_logic;
+    status_inbuffer_empty                       : out std_logic;
+    status_inbuffer_full                        : out std_logic;
+    status_dma_out_ready                        : out std_logic;
+    status_host_reset_ramclk                    : out std_logic;
     -- DEBUG
-    dbg_tbuf_table_count         : out dbg_count_vector(NUM_CHAINS - 1 downto 0) := (others => (others => '0'));
-    dbg_tbuf_word_count          : out dbg_count_vector(NUM_CHAINS - 1 downto 0) := (others => (others => '0'));
-    dbg_snpreader_round_done_cnt : out unsigned(47 downto 0)                     := (others => '0');
-    dbg_snpreader_snp_done_cnt   : out unsigned(47 downto 0)                     := (others => '0');
-    dbg_stall_cnt                : out unsigned(63 downto 0)                     := (others => '0');
-    dbg_inbuffer_rd_cnt          : out unsigned(31 downto 0)                     := (others => '0');
-    dbg_dram_rd_req_cnt          : out unsigned(47 downto 0)                     := (others => '0');
-    dbg_dram_rd_ans_cnt          : out unsigned(47 downto 0)                     := (others => '0');
-    dbg_dram_conflict_cnt        : out unsigned(15 downto 0)                     := (others => '0');
-    dbg_host_reset_cycle_cnt     : out unsigned(47 downto 0)                     := (others => '0');
-    dbg_host_reset_cnt           : out unsigned(15 downto 0)                     := (others => '0')
+    dbg_tbuf_table_count                        : out dbg_count_vector(NUM_CHAINS - 1 downto 0) := (others => (others => '0'));
+    dbg_tbuf_word_count                         : out dbg_count_vector(NUM_CHAINS - 1 downto 0) := (others => (others => '0'));
+    dbg_snpreader_round_done_cnt                : out unsigned(47 downto 0)                     := (others => '0');
+    dbg_snpreader_snp_done_cnt                  : out unsigned(47 downto 0)                     := (others => '0');
+    dbg_stall_cnt                               : out unsigned(63 downto 0)                     := (others => '0');
+    dbg_inbuffer_rd_cnt                         : out unsigned(31 downto 0)                     := (others => '0');
+    dbg_dram_rd_req_cnt                         : out unsigned(47 downto 0)                     := (others => '0');
+    dbg_dram_rd_ans_cnt                         : out unsigned(47 downto 0)                     := (others => '0');
+    dbg_dram_conflict_cnt                       : out unsigned(15 downto 0)                     := (others => '0');
+    dbg_host_reset_cycle_cnt                    : out unsigned(47 downto 0)                     := (others => '0');
+    dbg_host_reset_cnt                          : out unsigned(15 downto 0)                     := (others => '0');
+    dbg_ctable_io_bufsize_outwords_tig_ramclk   : out unsigned(31 downto 0);
+    dbg_ctable_io_bufsize_tablewords_tig_ramclk : out unsigned(31 downto 0);
+    dbg_num_samples_rounded_tig                 : out unsigned(31 downto 0);
+    dbg_num_cases_rounded_tig                   : out unsigned(31 downto 0);
+    dbg_num_snps_local_tig                      : out unsigned(31 downto 0);
+    dbg_last_init_snpidx_tig    : out unsigned(31 downto 0);
+    dbg_stream_start_snpidx_tig : out unsigned(31 downto 0);
+    dbg_stream_start_addr_tig   : out unsigned(29 downto 0);
+    dbg_round_addr_offset_tig   : out unsigned(29 downto 0)
   );
 end Engine;
 
@@ -276,8 +285,6 @@ begin
 
     inbuffer_rd_en <= '0';
     start_ctables  <= '0';
-    --    set_num_samples <= '0';
-    --    set_num_snps    <= '0';
 
     last_raw_gt_word <= last_raw_gt_word_tig;
 
@@ -295,8 +302,6 @@ begin
 
         when CONSTANTS1 =>
           inbuffer_rd_en <= '1';
-          --          set_num_samples <= '1';
-          --          set_num_snps <= '1';
 
           num_samples_rounded_tig <= unsigned(inbuffer_dout(31 downto 0));
           num_cases_rounded_tig   <= unsigned(inbuffer_dout(63 downto 32));
@@ -349,6 +354,17 @@ begin
     -- __DEBUG
 
   end process io_p;
+
+  -- write DEBUG values
+  dbg_ctable_io_bufsize_outwords_tig_ramclk   <= ctable_io_bufsize_outwords_tig_ramclk;
+  dbg_ctable_io_bufsize_tablewords_tig_ramclk <= ctable_io_bufsize_tablewords_tig_ramclk;
+  dbg_num_samples_rounded_tig                 <= num_samples_rounded_tig;
+  dbg_num_cases_rounded_tig                   <= num_cases_rounded_tig;
+  dbg_num_snps_local_tig                      <= num_snps_local_tig;
+  dbg_round_addr_offset_tig <= round_addr_offset_tig;
+  dbg_stream_start_addr_tig <= stream_start_addr_tig;
+  dbg_stream_start_snpidx_tig <= stream_start_snpidx_tig;
+  dbg_last_init_snpidx_tig <= last_init_snpidx_tig;
 
   pf_sync_p : process
     variable process_finished_tig : std_logic := '1';
@@ -422,15 +438,12 @@ begin
       ram_clk_reset              => dram_clk_sync_reset,
       stream_clk_reset           => stream_clk_sync_reset,
       num_samples_rounded_tig_in => num_samples_rounded_tig,
-      --      set_num_samples_in => set_num_samples,
       num_cases_rounded_tig_in   => num_cases_rounded_tig,
-      --      set_num_cases_in   => set_num_samples,
       num_snps_local_tig_in      => num_snps_local_tig,
       last_init_snpidx_tig_in    => last_init_snpidx_tig,
       stream_start_snpidx_tig_in => stream_start_snpidx_tig,
       stream_start_addr_tig_in   => stream_start_addr_tig,
       round_addr_offset_tig_in   => round_addr_offset_tig,
-      --      set_num_snps_in    => set_num_snps,
       start_reading_in           => snpreader_start_reading,
       genotype_out               => snpreader_genotype,
       new_genotype_out           => snpreader_new_genotype,
