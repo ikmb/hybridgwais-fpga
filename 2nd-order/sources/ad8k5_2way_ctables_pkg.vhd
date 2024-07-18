@@ -31,6 +31,7 @@ constant NUM_CHAINS : integer := 1; -- other changes required in VirtualFIFOArbi
 constant NUM_PE : integer := NUM_CHAINS * NUM_PE_PER_CHAIN;
 constant GENOTYPES_PER_CYCLE : integer := 8; -- must be a power of 2 -> when changing, update ReReadableFIFO!
 constant LOG_GENOTYPES_PER_CYCLE : integer := 3; -- base-2 logarithm of GENOTYPES_PER_CYCLE
+constant NUM_ENGINES : integer := 2; -- number of independend engines
 
 constant CTABLE_ENTRY_WIDTH : integer := 16;
 constant ID_WIDTH : integer := 32;
