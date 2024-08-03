@@ -92,6 +92,8 @@ architecture Behavioral of ad8k5_2way_ctables_main is
   signal status_inbuffer_full     : std_logic_vector(NUM_ENGINES - 1 downto 0);
   signal status_dma_out_ready     : std_logic_vector(NUM_ENGINES - 1 downto 0);
   signal status_host_reset_ramclk : std_logic_vector(NUM_ENGINES - 1 downto 0);
+  signal dbg_status_0 : std_logic_vector(7 downto 0);
+  signal dbg_status_1 : std_logic_vector(7 downto 0);
 
   -- DEBUG
   signal reg_we_intern     : std_logic;
@@ -270,6 +272,23 @@ begin
   status(6) <= '0';
   status(7) <= status_host_reset_ramclk(0);
 
+  dbg_status_0(0) <= status_snpreader_busy(0);
+  dbg_status_0(1) <= not status_process_finished(0);
+  dbg_status_0(2) <= not status_inbuffer_empty(0);
+  dbg_status_0(3) <= status_inbuffer_full(0);
+  dbg_status_0(4) <= '0';
+  dbg_status_0(5) <= not status_dma_out_ready(0);
+  dbg_status_0(6) <= '0';
+  dbg_status_0(7) <= status_host_reset_ramclk(0);
+  dbg_status_1(0) <= status_snpreader_busy(0);
+  dbg_status_1(1) <= not status_process_finished(1);
+  dbg_status_1(2) <= not status_inbuffer_empty(1);
+  dbg_status_1(3) <= status_inbuffer_full(1);
+  dbg_status_1(4) <= '0';
+  dbg_status_1(5) <= not status_dma_out_ready(1);
+  dbg_status_1(6) <= '0';
+  dbg_status_1(7) <= status_host_reset_ramclk(1);
+
   -- reset the pipeline
   host_reset_sig(0) <= reg_din(0) and not reg_we_intern_tig; -- make sure the reg_din is valid
   host_reset_sig(1) <= reg_din(1) and not reg_we_intern_tig; -- make sure the reg_din is valid
@@ -363,6 +382,7 @@ begin
       -- reg_dout_dbg(127 downto 0) <= ctchain_debug_tig(1); -- TODO remove
       -- reg_dout_dbg(175 downto 128) <= std_logic_vector(tbuf_table_count_tig(1)); -- TODO remove
       -- reg_dout_dbg(239 downto 192) <= std_logic_vector(tbuf_word_count_tig(1) ); -- TODO remove
+        reg_dout_intern(255 downto 248) <= dbg_status_0;
 
       when 5 =>
         reg_we_intern   <= '1';
@@ -428,6 +448,7 @@ begin
       -- reg_dout_dbg(127 downto 0) <= ctchain_debug_tig(1); -- TODO remove
       -- reg_dout_dbg(175 downto 128) <= std_logic_vector(tbuf_table_count_tig(1)); -- TODO remove
       -- reg_dout_dbg(239 downto 192) <= std_logic_vector(tbuf_word_count_tig(1) ); -- TODO remove
+      reg_dout_intern(255 downto 248) <= dbg_status_1;
 
       when 11 =>
         reg_we_intern   <= '1';
