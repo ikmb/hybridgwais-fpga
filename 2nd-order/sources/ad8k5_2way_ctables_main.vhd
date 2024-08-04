@@ -272,23 +272,6 @@ begin
   status(6) <= '0';
   status(7) <= status_host_reset_ramclk(0);
 
-  dbg_status_0(0) <= status_snpreader_busy(0);
-  dbg_status_0(1) <= not status_process_finished(0);
-  dbg_status_0(2) <= not status_inbuffer_empty(0);
-  dbg_status_0(3) <= status_inbuffer_full(0);
-  dbg_status_0(4) <= '0';
-  dbg_status_0(5) <= not status_dma_out_ready(0);
-  dbg_status_0(6) <= '0';
-  dbg_status_0(7) <= status_host_reset_ramclk(0);
-  dbg_status_1(0) <= status_snpreader_busy(0);
-  dbg_status_1(1) <= not status_process_finished(1);
-  dbg_status_1(2) <= not status_inbuffer_empty(1);
-  dbg_status_1(3) <= status_inbuffer_full(1);
-  dbg_status_1(4) <= '0';
-  dbg_status_1(5) <= not status_dma_out_ready(1);
-  dbg_status_1(6) <= '0';
-  dbg_status_1(7) <= status_host_reset_ramclk(1);
-
   -- reset the pipeline
   host_reset_sig(0) <= reg_din(0) and not reg_we_intern_tig; -- make sure the reg_din is valid
   host_reset_sig(1) <= reg_din(1) and not reg_we_intern_tig; -- make sure the reg_din is valid
@@ -492,6 +475,23 @@ begin
     tbuf_word_count_tig_1  := tbuf_word_count_sig_1;
 
     reg_we_intern_tig <= reg_we_intern;
+
+    dbg_status_0(0) <= status_snpreader_busy(0);
+    dbg_status_0(1) <= not status_process_finished(0);
+    dbg_status_0(2) <= not status_inbuffer_empty(0);
+    dbg_status_0(3) <= status_inbuffer_full(0);
+    dbg_status_0(4) <= '0';
+    dbg_status_0(5) <= not status_dma_out_ready(0);
+    dbg_status_0(6) <= '0';
+    dbg_status_0(7) <= status_host_reset_ramclk(0);
+    dbg_status_1(0) <= status_snpreader_busy(0);
+    dbg_status_1(1) <= not status_process_finished(1);
+    dbg_status_1(2) <= not status_inbuffer_empty(1);
+    dbg_status_1(3) <= status_inbuffer_full(1);
+    dbg_status_1(4) <= '0';
+    dbg_status_1(5) <= not status_dma_out_ready(1);
+    dbg_status_1(6) <= '0';
+    dbg_status_1(7) <= status_host_reset_ramclk(1);
 
   end process reg_dbg_p;
 
