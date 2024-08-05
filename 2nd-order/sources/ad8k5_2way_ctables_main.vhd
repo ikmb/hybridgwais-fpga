@@ -94,6 +94,8 @@ architecture Behavioral of ad8k5_2way_ctables_main is
   signal status_host_reset_ramclk : std_logic_vector(NUM_ENGINES - 1 downto 0);
   signal dbg_status_0 : std_logic_vector(7 downto 0);
   signal dbg_status_1 : std_logic_vector(7 downto 0);
+  signal dbg_status_0_del : std_logic_vector(7 downto 0);
+  signal dbg_status_1_del : std_logic_vector(7 downto 0);
 
   -- DEBUG
   signal reg_we_intern     : std_logic;
@@ -365,7 +367,7 @@ begin
       -- reg_dout_dbg(127 downto 0) <= ctchain_debug_tig(1); -- TODO remove
       -- reg_dout_dbg(175 downto 128) <= std_logic_vector(tbuf_table_count_tig(1)); -- TODO remove
       -- reg_dout_dbg(239 downto 192) <= std_logic_vector(tbuf_word_count_tig(1) ); -- TODO remove
-        reg_dout_intern(255 downto 248) <= dbg_status_0;
+        reg_dout_intern(255 downto 248) <= dbg_status_0_del;
 
       when 5 =>
         reg_we_intern   <= '1';
@@ -431,7 +433,7 @@ begin
       -- reg_dout_dbg(127 downto 0) <= ctchain_debug_tig(1); -- TODO remove
       -- reg_dout_dbg(175 downto 128) <= std_logic_vector(tbuf_table_count_tig(1)); -- TODO remove
       -- reg_dout_dbg(239 downto 192) <= std_logic_vector(tbuf_word_count_tig(1) ); -- TODO remove
-      reg_dout_intern(255 downto 248) <= dbg_status_1;
+      reg_dout_intern(255 downto 248) <= dbg_status_1_del;
 
       when 11 =>
         reg_we_intern   <= '1';
@@ -492,6 +494,9 @@ begin
     dbg_status_1(5) <= not status_dma_out_ready(1);
     dbg_status_1(6) <= '0';
     dbg_status_1(7) <= status_host_reset_ramclk(1);
+
+    dbg_status_0_del <= dbg_status_0;
+    dbg_status_1_del <= dbg_status_1;
 
   end process reg_dbg_p;
 
